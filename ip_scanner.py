@@ -80,11 +80,6 @@ print(f"Total time taken: {endtime - start_time} seconds.")
 
 # ----------------------------------------------------------------------------
 
-# My IP direction: 192.168.100.162
-# So let's say that I want to scan from there (192.168.100.162) to (192.168.100.240) in that case
-# I need to find a way to change the last row value.
-# I can use +str(n) -> so i have an IP address: "192.168.100." + str(n)
-
 # Upgrades: operating system detection (platform.system()).
 # Add timing
 # Detect mask automatically (low priority)
