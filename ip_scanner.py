@@ -43,7 +43,12 @@ print("Ranges in an IP direction are from 1 to 254")
 # --PORT SCANNER--------------------------------------------------------------------------
 
 def port_scan(ip):
-    full_scan = subprocess.run()
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM):
+        for port in range (1, 1025):
+            s.settimeout(0.5)
+            result = s.connect_ex((ip,port))
+            if result == 0:
+                print(f"Port {port} is OPEN")
 
 # --FULL SCAN SUBNET FUNCTION (STILL EXPERIMENTAL)--------------------------------------------------------------------------
 
@@ -132,9 +137,3 @@ if __name__ == "__main__":
 
     with open("ip_answers.json", "w") as outfile:
         json.dump(data, outfile)
-
-
-# Upgrades:
-# Detect mask automatically (low priority)
-# sub red full scan with ipaddress.ip_network()
-# Usage of "socket" library just to create a tool more precise
