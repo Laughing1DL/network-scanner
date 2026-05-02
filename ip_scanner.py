@@ -1,6 +1,7 @@
 # CODE DONE WITH NO VIBE CODING!!
 
 import subprocess
+from _socket import getservbyport
 from multiprocessing import Pool
 import ipaddress
 import platform
@@ -30,12 +31,15 @@ def permission(ip):
 # --IP SCAN FUNCTION (WORKER)--------------------------------------------------------------------------
 
 def ip_scan(result):
+    ports_found = []
     answer_time = time.time()
     status_quo = permission(result)
+    if status_quo == True:
+        ports_found = port_scan(result)
     answer_time_end = time.time()
     answer_time_total = answer_time_end - answer_time
     answer_time_total = round(answer_time_total, 4)
-    return (result,status_quo, answer_time_total)
+    return (result,status_quo, answer_time_total, ports_found)
 
 print("Example in a IP address: 100.10.10")
 print("Ranges in an IP direction are from 1 to 254")
@@ -43,24 +47,20 @@ print("Ranges in an IP direction are from 1 to 254")
 # --PORT SCANNER--------------------------------------------------------------------------
 
 def port_scan(ip):
-    with socket.socket(socket.AF_INET, socket.SOCK_STREAM):
-        for port in range (1, 1025):
+    open_ports = []
+    for port in (10, 22, 80, 443, 3389, 6553):
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
             s.settimeout(0.5)
             result = s.connect_ex((ip,port))
             if result == 0:
-                print(f"Port {port} is OPEN")
+                try:
+                    port_type = getservbyport(port)
+                    open_ports.append(f"{port}/{port_type}")
+                except OSError:
+                    open_ports.append(f"Port {port} is unknown")
+                    print(f"Unknown port {port}")
 
-# --FULL SCAN SUBNET FUNCTION (STILL EXPERIMENTAL)--------------------------------------------------------------------------
-
-def subnet_full_scan(ip_network):
-    global full_scan
-    operating_sys = platform.system()
-    if operating_sys == 'Linux':
-        full_scan = subprocess.run(
-        ["ping","-c", "1", "-W", "1", ip_network],
-        stdout = subprocess.DEVNULL
-        )
-    return full_scan.returncode == 0
+    return open_ports
 
 # --ARGUMENT PARSER SEGMENT--------------------------------------------------------------------------
 
@@ -123,12 +123,12 @@ if __name__ == "__main__":
 
     with Pool(10) as p:
         results = p.map(ip_scan, ip_pool)
-        for result, status_quo, answer_time_total in results:
+        for result, status_quo, answer_time_total,ports_found in results:
             if status_quo:
                 print(f"Scanned IP {result} is responsive!")
                 print(f"Total time taken: {answer_time_total} seconds.")
 
-                data.append({"ip": result, "status": status_quo,"time": answer_time_total})
+                data.append({"ip": result, "status": status_quo,"time": answer_time_total, "ports": ports_found})
 
     endtime = time.time()
     print(f"Total time taken: {endtime - start_time} seconds.")
